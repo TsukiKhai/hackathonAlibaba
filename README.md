@@ -52,8 +52,11 @@ This project provides an **AI-powered assistant** that helps:
 - 📈 **Summary Dashboard** (React + Vite frontend)
 - ⚙️ **FastAPI Backend** for analysis and data processing
 
-## Team Name
+## Team Name -- Strategic Synergy
 - Fabian Tan Hann Shen
 - Chong Kai Zhi
 - Tan Yuett Ning
 - Tan Wee Jin
+
+## Team Leader's Email : 
+fnever520@gmail.com
