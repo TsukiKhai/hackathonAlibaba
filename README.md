@@ -60,6 +60,3 @@ This project provides an **AI-powered assistant** that helps:
 
 ## Team Leader's Email : 
 fnever520@gmail.com
-
-## Team Leader's Phone Number: 
-012-428637
