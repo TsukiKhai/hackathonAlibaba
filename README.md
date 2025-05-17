@@ -58,6 +58,8 @@ This project provides an **AI-powered assistant** that helps:
 - Tan Yuett Ning
 - Tan Wee Jin
 
-## Team Leader's Email : fnever520@gmail.com
+## Team Leader's Email : 
+fnever520@gmail.com
 
-## Team Leader's Phone Number: 012-428637
+## Team Leader's Phone Number: 
+012-428637
