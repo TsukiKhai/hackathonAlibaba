@@ -1,0 +1,11 @@
+{
+    "base_salary": 5072.45,
+    "bonuses": {
+        "incentives": 657.4,
+        "tips": 243.52,
+        "miscellaneous_earnings": 23.4
+    },
+    "deductions": -228.36,
+    "net_income": 5768.41,
+    "pay_period_end": "31 December 2023"
+}
