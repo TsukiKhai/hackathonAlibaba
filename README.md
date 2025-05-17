@@ -32,7 +32,6 @@ This project provides an **AI-powered assistant** that helps:
 - **🔐 User Accounts & Security:** Add authentication and encrypted storage to keep user financial data safe and private.  
 - **🤖 Advanced AI:** Incorporate machine learning models to improve categorization accuracy and detect unusual expense patterns or potential tax savings.  
 - **📊 Analytics Dashboard:** Visualize spending trends, tax deductions, and savings opportunities over time.  
-- **🌐 Multilingual Support:** Support additional languages for broader accessibility across Malaysia’s diverse population.
 
 ---
 
