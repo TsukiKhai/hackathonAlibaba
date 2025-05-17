@@ -44,7 +44,6 @@ This project provides an **AI-powered assistant** that helps:
 - **Empower Freelancers:** Enable independent workers to focus more on their work and less on administrative overhead.  
 - **Promote Digital Transformation:** Support Malaysia’s push toward digital financial management and e-governance by integrating modern AI and software solutions.
 
-
 ## 🚀 Features
 
 - 🧠 **AI-Powered Expense Categorization** using NLP (via spaCy)
@@ -52,3 +51,9 @@ This project provides an **AI-powered assistant** that helps:
 - 📁 **Tax Deduction Suggestions** based on LHDN categories
 - 📈 **Summary Dashboard** (React + Vite frontend)
 - ⚙️ **FastAPI Backend** for analysis and data processing
+
+## Team Name
+- Fabian Tan Hann Shen
+- Chong Kai Zhi
+- Tan Yuett Ning
+- Tan Wee Jin
