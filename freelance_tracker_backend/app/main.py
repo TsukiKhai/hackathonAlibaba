@@ -1,56 +1,42 @@
-from fastapi import FastAPI, Depends
-from fastapi.middleware.cors import CORSMiddleware  # ✅ Import CORS middleware
-from sqlalchemy.orm import Session
-from . import models, database, crud, schemas
-from fastapi import File, UploadFile
-from PIL import Image
-import pytesseract
-import io
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import spacy
 
-models.Base.metadata.create_all(bind=database.engine)
+nlp = spacy.load("en_core_web_sm")
+
+deduction_rules = [
+    {"keywords": ["laptop", "computer", "tablet", "phone"], "category": "Lifestyle Expenses", "max_amount": 2500, "note": "Eligible under lifestyle expenses for electronic devices"},
+    {"keywords": ["online course", "graphic design", "education", "training"], "category": "Education Fees (Self)", "max_amount": 7000, "note": "For approved self-enhancement or professional courses"},
+    {"keywords": ["health insurance", "medical insurance"], "category": "Education and Medical Insurance", "max_amount": 3000, "note": "Medical and education insurance premiums"},
+    {"keywords": ["prs", "private retirement", "retirement scheme"], "category": "Private Retirement Scheme (PRS)", "max_amount": 3000, "note": "Contributions to PRS are deductible"},
+]
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # This is where Vite runs
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Dependency to get DB session
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+class ExpenseInput(BaseModel):
+    text: str
 
 @app.get("/")
-def read_root():
-    return {"message": "Freelance Expense Tracker API is running"}
+async def root():
+    return {"message": "Welcome to Freelance Tracker API"}
 
-@app.post("/expenses/")
-def create_expense(expense: schemas.ExpenseCreate, db: Session = Depends(get_db)):
-    return crud.create_expense(db, expense)
+@app.post("/analyze")
+async def analyze_expense(data: ExpenseInput):
+    text = data.text.lower()
+    suggestions = []
 
-@app.get("/expenses/")
-def read_expenses(db: Session = Depends(get_db)):
-    return crud.get_expenses(db)
+    for rule in deduction_rules:
+        if any(keyword in text for keyword in rule["keywords"]):
+            if rule not in suggestions:
+                suggestions.append(rule)
 
-@app.post("/income/")
-def create_income(income: schemas.IncomeCreate, db: Session = Depends(get_db)):
-    return crud.create_income(db, income)
-
-@app.get("/income/")
-def read_incomes(db: Session = Depends(get_db)):
-    return crud.get_incomes(db)
-
-
-@app.post("/ocr/")
-async def run_ocr(file: UploadFile = File(...)):
-    contents = await file.read()
-    image = Image.open(io.BytesIO(contents))
-    text = pytesseract.image_to_string(image)
-    return {"text": text}
+    return {"suggestions": suggestions}
