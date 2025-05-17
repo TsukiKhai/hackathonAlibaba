@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Freelance Tracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-3">
+    <a class="navbar-brand" href="#">💼 Freelance Tracker</a>
+    <div class="navbar-nav">
+      <a class="nav-link active" href="#dashboard" onclick="showPage('dashboard')">Dashboard</a>
+      <a class="nav-link" href="#manual-entry" onclick="showPage('manual-entry')">Manual Entry</a>
+      <a class="nav-link" href="#upload" onclick="showPage('upload')">Upload</a>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="page-section">
+      <h2 class="mb-3">📊 Dashboard</h2>
+      <div class="row text-center">
+        <div class="col-md-4"><div class="card p-3"><h4>Total Income</h4><p id="total-income">RM 0.00</p></div></div>
+        <div class="col-md-4"><div class="card p-3"><h4>Total Expenses</h4><p id="total-expenses">RM 0.00</p></div></div>
+        <div class="col-md-4"><div class="card p-3"><h4>Net Balance</h4><p id="net-balance">RM 0.00</p></div></div>
+      </div>
+      <div class="mt-4">
+        <canvas id="category-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Manual Entry -->
+    <div id="manual-entry" class="page-section" style="display:none;">
+      <h2>Add Transactions</h2>
+      <div class="row">
+        <!-- Expense Form -->
+        <div class="col-md-6">
+          <h4>Add Expense</h4>
+          <form id="expense-form">
+            <input type="date" class="form-control mb-2" id="expense-date" required />
+            <input type="number" class="form-control mb-2" id="expense-amount" placeholder="Amount" required />
+            <input type="text" class="form-control mb-2" id="expense-category" placeholder="Category" required />
+            <input type="text" class="form-control mb-2" id="expense-description" placeholder="Description" />
+            <button class="btn btn-danger" type="submit">Add Expense</button>
+          </form>
+        </div>
+
+        <!-- Income Form -->
+        <div class="col-md-6">
+          <h4>Add Income</h4>
+          <form id="income-form">
+            <input type="date" class="form-control mb-2" id="income-date" required />
+            <input type="number" class="form-control mb-2" id="income-amount" placeholder="Amount" required />
+            <input type="text" class="form-control mb-2" id="income-client" placeholder="Client" required />
+            <input type="text" class="form-control mb-2" id="income-description" placeholder="Description" />
+            <button class="btn btn-success" type="submit">Add Income</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div id="upload" class="page-section" style="display:none;">
+      <h2>📥 Upload Receipt</h2>
+      <div class="mb-3">
+        <input type="file" class="form-control" id="receipt-image" accept="image/*">
+      </div>
+      <div class="mb-3">
+        <img id="preview-img" src="#" alt="Preview" class="img-fluid" style="max-height: 300px; display: none;" />
+      </div>
+      <button class="btn btn-primary" onclick="submitOCR()">Run OCR</button>
+      <div class="mt-3">
+        <h5>📝 Extracted Text</h5>
+        <pre id="ocr-result" class="bg-white p-3 border"></pre>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="feedback-toast" class="toast align-items-center text-bg-success border-0" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            ✅ Transaction added!
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page-section').forEach(el => el.style.display = 'none');
+      document.getElementById(pageId).style.display = 'block';
+    }
+
+    function showToast() {
+      const toastEl = document.getElementById('feedback-toast');
+      const toast = new bootstrap.Toast(toastEl);
+      toast.show();
+    }
+
+    document.getElementById("expense-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = {
+        date: document.getElementById("expense-date").value,
+        amount: parseFloat(document.getElementById("expense-amount").value),
+        category: document.getElementById("expense-category").value,
+        description: document.getElementById("expense-description").value || ""
+      };
+      await fetch(`${API_BASE}/expenses/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      showToast();
+      loadDashboard();
+      e.target.reset();
+    });
+
+    document.getElementById("income-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = {
+        date: document.getElementById("income-date").value,
+        amount: parseFloat(document.getElementById("income-amount").value),
+        client: document.getElementById("income-client").value,
+        description: document.getElementById("income-description").value || ""
+      };
+      await fetch(`${API_BASE}/income/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      showToast();
+      loadDashboard();
+      e.target.reset();
+    });
+
+    async function loadDashboard() {
+      const [expensesRes, incomeRes] = await Promise.all([
+        fetch(`${API_BASE}/expenses/`),
+        fetch(`${API_BASE}/income/`)
+      ]);
+
+      const expenses = await expensesRes.json();
+      const incomes = await incomeRes.json();
+
+      const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+      const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
+      const netBalance = totalIncome - totalExpenses;
+
+      document.getElementById("total-income").textContent = `RM ${totalIncome.toFixed(2)}`;
+      document.getElementById("total-expenses").textContent = `RM ${totalExpenses.toFixed(2)}`;
+      document.getElementById("net-balance").textContent = `RM ${netBalance.toFixed(2)}`;
+
+      const categoryTotals = {};
+      expenses.forEach(e => {
+        categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
+      });
+
+      const ctx = document.getElementById('category-chart');
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(categoryTotals),
+          datasets: [{
+            data: Object.values(categoryTotals),
+            backgroundColor: ['#f87171', '#60a5fa', '#fbbf24', '#34d399', '#a78bfa']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+
+    document.getElementById("receipt-image").addEventListener("change", function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.getElementById("preview-img");
+          img.src = e.target.result;
+          img.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    async function submitOCR() {
+      const fileInput = document.getElementById("receipt-image");
+      const file = fileInput.files[0];
+      if (!file) return alert("Please upload an image first.");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(`${API_BASE}/ocr/`, {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      document.getElementById("ocr-result").textContent = data.text || "No text found.";
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>
