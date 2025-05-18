@@ -52,10 +52,8 @@ This project provides an **AI-powered assistant** that helps:
 - ⚙️ **FastAPI Backend** for analysis and data processing
 
 ## Team Name -- Strategic Synergy
-- Fabian Tan Hann Shen
-- Chong Kai Zhi
-- Tan Yuett Ning
-- Tan Wee Jin
+- Fabian Tan Hann Shen - Backend Developer
+- Chong Kai Zhi -Full Stack Developer
+- Tan Yuett Ning - UI/UX Designer
+- Tan Wee Jin - AI Implementation Specialist
 
-## Team Leader's Email : 
-fnever520@gmail.com
